@@ -10,7 +10,7 @@ from utils.utils import get_classes
 #   annotation_mode为1代表获得VOCdevkit/VOC2007/ImageSets里面的txt
 #   annotation_mode为2代表获得训练用的2007_train.txt、2007_val.txt
 #--------------------------------------------------------------------------------------------------------------------------------#
-annotation_mode     = 0
+annotation_mode     = 2
 #-------------------------------------------------------------------#
 #   必须要修改，用于生成2007_train.txt、2007_val.txt的目标信息
 #   与训练和预测所用的classes_path一致即可
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             image_ids = open(os.path.join(VOCdevkit_path, 'VOC%s/ImageSets/Main/%s.txt'%(year, image_set)), encoding='utf-8').read().strip().split()
             list_file = open('%s_%s.txt'%(year, image_set), 'w', encoding='utf-8')
             for image_id in image_ids:
-                list_file.write('%s/VOC%s/JPEGImages/%s.jpg'%(os.path.abspath(VOCdevkit_path), year, image_id))
+                list_file.write('%s/VOC%s/JPEGImages/%s.png'%(os.path.abspath(VOCdevkit_path), year, image_id))
 
                 convert_annotation(year, image_id, list_file)
                 list_file.write('\n')

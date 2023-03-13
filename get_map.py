@@ -1,4 +1,5 @@
 import os
+import re
 import xml.etree.ElementTree as ET
 
 from PIL import Image
@@ -7,6 +8,8 @@ from tqdm import tqdm
 from yolo import YOLO
 from utils.utils import get_classes
 from utils.utils_map import get_coco_map, get_map
+
+import shutil
 
 if __name__ == "__main__":
     '''
@@ -28,7 +31,7 @@ if __name__ == "__main__":
     #   此处的classes_path用于指定需要测量VOC_map的类别
     #   一般情况下与训练和预测所用的classes_path一致即可
     #-------------------------------------------------------#
-    classes_path    = 'model_data/voc_classes.txt'
+    classes_path    = 'model_data/coco_classes.txt'
     #-------------------------------------------------------#
     #   MINOVERLAP用于指定想要获得的mAP0.x
     #   比如计算mAP0.75，可以设定MINOVERLAP = 0.75。
@@ -47,17 +50,37 @@ if __name__ == "__main__":
     #   结果输出的文件夹，默认为map_out
     #-------------------------------------------------------#
     map_out_path    = 'map_out'
+    
+    image_ids = []
+    txt_lines = open(os.path.join(VOCdevkit_path, "txt_data\\valid.txt")).readlines()
+    for txt_line in txt_lines:
+        id = re.search("/\d+",txt_line).group().strip('/')
+        lenth = len(id)
+        if lenth == 4:
+            image_ids.append(re.search("/\d+",txt_line).group().strip('/'))
 
-    image_ids = open(os.path.join(VOCdevkit_path, "VOC2007/ImageSets/Main/test.txt")).read().strip().split()
+
 
     if not os.path.exists(map_out_path):
         os.makedirs(map_out_path)
+    else:
+        shutil.rmtree(map_out_path)
+        os.mkdir(map_out_path)
     if not os.path.exists(os.path.join(map_out_path, 'ground-truth')):
         os.makedirs(os.path.join(map_out_path, 'ground-truth'))
+    else:
+        shutil.rmtree(os.path.join(map_out_path, 'ground-truth'))
+        os.mkdir(os.path.join(map_out_path, 'ground-truth'))
     if not os.path.exists(os.path.join(map_out_path, 'detection-results')):
         os.makedirs(os.path.join(map_out_path, 'detection-results'))
+    else:
+        shutil.rmtree(os.path.join(map_out_path, 'detection-results'))
+        os.mkdir(os.path.join(map_out_path, 'detection-results'))
     if not os.path.exists(os.path.join(map_out_path, 'images-optional')):
         os.makedirs(os.path.join(map_out_path, 'images-optional'))
+    else:
+        shutil.rmtree(os.path.join(map_out_path, 'images-optional'))
+        os.mkdir(os.path.join(map_out_path, 'images-optional'))
 
     class_names, _ = get_classes(classes_path)
 
@@ -68,10 +91,10 @@ if __name__ == "__main__":
 
         print("Get predict result.")
         for image_id in tqdm(image_ids):
-            image_path  = os.path.join(VOCdevkit_path, "VOC2007/JPEGImages/"+image_id+".jpg")
+            image_path  = os.path.join(VOCdevkit_path, "VOC2007/JPEGImages/"+image_id+".png")
             image       = Image.open(image_path)
             if map_vis:
-                image.save(os.path.join(map_out_path, "images-optional/" + image_id + ".jpg"))
+                image.save(os.path.join(map_out_path, "images-optional/" + image_id + ".png"))
             yolo.get_map_txt(image_id, image, class_names, map_out_path)
         print("Get predict result done.")
         
